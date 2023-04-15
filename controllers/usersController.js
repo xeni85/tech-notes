@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt');
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
     const users = await User.find().select('-password').lean()
-    if(!users){
+    if(!users?.length){
         return res.status(400).json({message:'No users found'})
     }
     res.json(users)
@@ -51,11 +51,11 @@ const createNewUser = asyncHandler(async (req, res, next) => {
 //@route PATCH /users
 //@access Private
 
-const updateUser = asyncHandler(async (req, res, next) => {
+const updateUser = asyncHandler(async (req, res) => {
     const { id, username, roles, active, password } = req.body
 
     //confirm data
-    if(!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== boolean) {
+    if(!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {
         return res.status(400).json({ message: 'All fields are required'})
     }
 
@@ -69,7 +69,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
     const duplicate = await User.findOne({ username }).lean().exec()
 
     //Allow updates to the original user
-    if(duplicate && duplicate?._id.toString() != id) { 
+    if(duplicate && duplicate?._id.toString() !== id) { 
        return res.status(409).json({ message: 'Duplicate usernames'}) 
     }
 
@@ -82,7 +82,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
         user.password = await bcrypt.hash(password, 10) //salt rounds
     }
 
-    const updateUser = await user.save()
+    const updatedUser = await user.save()
 
     res.json({ message: `${updatedUser.username} updated` })
 })
