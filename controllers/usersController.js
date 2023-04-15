@@ -52,14 +52,15 @@ const createNewUser = asyncHandler(async (req, res, next) => {
 //@access Private
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { id, username, roles, active, password } = req.body
+    const { _id, username, roles, active, password } = req.body
 
+    console.log(username)
     //confirm data
-    if(!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {
+    if(!_id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {
         return res.status(400).json({ message: 'All fields are required'})
     }
 
-    const user = await User.findById(id).exec()
+    const user = await User.findById(_id).exec()
 
     if(!user) {
         return res.status(400).json({ message: 'User not found' })
@@ -69,7 +70,7 @@ const updateUser = asyncHandler(async (req, res) => {
     const duplicate = await User.findOne({ username }).lean().exec()
 
     //Allow updates to the original user
-    if(duplicate && duplicate?._id.toString() !== id) { 
+    if(duplicate && duplicate?._id.toString() !== _id) { 
        return res.status(409).json({ message: 'Duplicate usernames'}) 
     }
 
