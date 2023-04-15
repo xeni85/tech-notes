@@ -52,15 +52,15 @@ const createNewUser = asyncHandler(async (req, res, next) => {
 //@access Private
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { _id, username, roles, active, password } = req.body
+    const { id, username, roles, active, password } = req.body
 
     console.log(username)
     //confirm data
-    if(!_id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {
+    if(!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {
         return res.status(400).json({ message: 'All fields are required'})
     }
 
-    const user = await User.findById(_id).exec()
+    const user = await User.findById(id).exec()
 
     if(!user) {
         return res.status(400).json({ message: 'User not found' })
@@ -70,7 +70,7 @@ const updateUser = asyncHandler(async (req, res) => {
     const duplicate = await User.findOne({ username }).lean().exec()
 
     //Allow updates to the original user
-    if(duplicate && duplicate?._id.toString() !== _id) { 
+    if(duplicate && duplicate?._id.toString() !== id) { 
        return res.status(409).json({ message: 'Duplicate usernames'}) 
     }
 
@@ -98,9 +98,9 @@ const deleteUser = asyncHandler(async (req, res, next) => {
     if(!id) {
         return res.status(400).json({message: 'User ID Required'})
     }
-    const notes = await Note.findOne({ user: id }).lean().exec()
+    const note = await Note.findOne({ user: id }).lean().exec()
     
-    if(notes?.length) {
+    if(note?.length) {
         return res.status(400).json({ message : 'User has assigned note'})
     }
 
@@ -109,7 +109,7 @@ const deleteUser = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: 'User not found' })
     }
 
-    const result = await User.deleteOne()
+    const result = await user.deleteOne()
     
     const reply = `${result.username} with ID ${result._id} deleted successfully`
 
